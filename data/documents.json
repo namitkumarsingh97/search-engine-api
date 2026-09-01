@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "title": "Python Programming",
+    "url": "https://www.w3schools.com/python",
+    "content": "Python is a programming language that lets you work quickly and integrate systems more effectively. It is widely used for web development, data analysis, and automation."
+  },
+  {
+    "id": "2",
+    "title": "JavaScript Guide",
+    "url": "https://www.w3schools.com/js",
+    "content": "JavaScript is used to build web applications. It runs in the browser and on the server with Node.js, making it useful for full-stack development."
+  },
+  {
+    "id": "3",
+    "title": "Python Web Development",
+    "url": "https://www.geeksforgeeks.org/python/python-web-development",
+    "content": "Python web development frameworks like Django and Flask make it easy to build web applications quickly. Python is also popular for APIs."
+  },
+  {
+    "id": "4",
+    "title": "Learn Python",
+    "url": "https://www.geeksforgeeks.org/python/python-basics",
+    "content": "Python can be used to build websites, automate tasks, analyze data, and much more. This guide covers the basics of the programming language."
+  },
+  {
+    "id": "5",
+    "title": "Web Development Basics",
+    "url": "https://www.geeksforgeeks.org/web-tech/web-technology",
+    "content": "Web development involves building and maintaining websites. It includes web design, web publishing, web programming, and database management."
+  }
+]
