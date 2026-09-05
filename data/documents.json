@@ -28,5 +28,280 @@
     "title": "Web Development Basics",
     "url": "https://www.geeksforgeeks.org/web-tech/web-technology",
     "content": "Web development involves building and maintaining websites. It includes web design, web publishing, web programming, and database management."
+  },
+  {
+    "id": "6",
+    "title": "Wikipedia — Artificial Intelligence",
+    "url": "https://en.wikipedia.org/wiki/Artificial_intelligence",
+    "content": "An overview of artificial intelligence, its history, subfields like machine learning and natural language processing, and its applications across industries."
+  },
+  {
+    "id": "7",
+    "title": "Wikipedia — Solar System",
+    "url": "https://en.wikipedia.org/wiki/Solar_System",
+    "content": "A reference article covering the sun, eight planets, dwarf planets, moons, and other bodies that make up our solar system."
+  },
+  {
+    "id": "8",
+    "title": "Wikipedia — World War II",
+    "url": "https://en.wikipedia.org/wiki/World_War_II",
+    "content": "A historical overview of the causes, major events, and aftermath of World War II, the deadliest conflict in human history."
+  },
+  {
+    "id": "9",
+    "title": "Khan Academy — Algebra Basics",
+    "url": "https://www.khanacademy.org/math/algebra-basics",
+    "content": "Free lessons covering algebra fundamentals including variables, equations, linear functions, and graphing."
+  },
+  {
+    "id": "10",
+    "title": "MDN — HTML Basics",
+    "url": "https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML",
+    "content": "An introduction to HTML, the standard markup language for creating web pages and web applications."
+  },
+  {
+    "id": "11",
+    "title": "MDN — CSS Basics",
+    "url": "https://developer.mozilla.org/en-US/docs/Learn/CSS/First_steps",
+    "content": "A beginner-friendly introduction to CSS, covering selectors, properties, and how styling works on the web."
+  },
+  {
+    "id": "12",
+    "title": "National Geographic — Animals",
+    "url": "https://www.nationalgeographic.com/animals",
+    "content": "Facts, photos, and articles about wildlife, animal behavior, and conservation from around the world."
+  },
+  {
+    "id": "13",
+    "title": "NASA — Solar System Exploration",
+    "url": "https://science.nasa.gov/solar-system",
+    "content": "NASA's overview of planets, moons, and missions exploring our solar system."
+  },
+  {
+    "id": "14",
+    "title": "BBC Bitesize — Science",
+    "url": "https://www.bbc.co.uk/bitesize/subjects/z2pfb9q",
+    "content": "Educational resources covering core science topics for students, including biology, chemistry, and physics."
+  },
+  {
+    "id": "15",
+    "title": "History.com — Ancient Egypt",
+    "url": "https://www.history.com/topics/ancient-egypt",
+    "content": "An overview of ancient Egyptian civilization, including the pharaohs, pyramids, and daily life along the Nile."
+  },
+
+  {
+    "id": "16",
+    "title": "MDN — JavaScript Reference",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
+    "content": "The complete reference documentation for the JavaScript programming language, covering syntax, objects, and built-in methods."
+  },
+  {
+    "id": "17",
+    "title": "React Documentation",
+    "url": "https://react.dev/learn",
+    "content": "Official documentation for React, covering components, hooks, state management, and building user interfaces."
+  },
+  {
+    "id": "18",
+    "title": "Node.js Documentation",
+    "url": "https://nodejs.org/en/docs",
+    "content": "Official documentation for Node.js, a JavaScript runtime built on Chrome's V8 engine for building server-side applications."
+  },
+  {
+    "id": "19",
+    "title": "MongoDB Documentation",
+    "url": "https://www.mongodb.com/docs/manual",
+    "content": "Official manual for MongoDB, a document-oriented NoSQL database, covering CRUD operations, indexing, and aggregation."
+  },
+  {
+    "id": "20",
+    "title": "freeCodeCamp — Learn to Code",
+    "url": "https://www.freecodecamp.org",
+    "content": "A free platform offering interactive coding lessons and certifications in web development, data science, and more."
+  },
+  {
+    "id": "21",
+    "title": "Stack Overflow",
+    "url": "https://stackoverflow.com",
+    "content": "A question-and-answer community for programmers, covering nearly every programming language and technology."
+  },
+  {
+    "id": "22",
+    "title": "GeeksforGeeks — Data Structures",
+    "url": "https://www.geeksforgeeks.org/data-structures",
+    "content": "Tutorials and problems covering data structures like arrays, linked lists, trees, and graphs, commonly asked in coding interviews."
+  },
+  {
+    "id": "23",
+    "title": "GeeksforGeeks — System Design",
+    "url": "https://www.geeksforgeeks.org/system-design",
+    "content": "Articles and guides on system design concepts including scalability, load balancing, caching, and database design."
+  },
+  {
+    "id": "24",
+    "title": "LeetCode",
+    "url": "https://leetcode.com",
+    "content": "A platform for practicing coding problems and preparing for technical interviews at top tech companies."
+  },
+  {
+    "id": "25",
+    "title": "GitHub",
+    "url": "https://github.com",
+    "content": "A platform for hosting and collaborating on code repositories, widely used for open source and private software projects."
+  },
+
+  {
+    "id": "26",
+    "title": "IMDb — Top Rated Movies",
+    "url": "https://www.imdb.com/chart/top",
+    "content": "A ranked list of the top-rated movies of all time according to IMDb user ratings."
+  },
+  {
+    "id": "27",
+    "title": "Rotten Tomatoes",
+    "url": "https://www.rottentomatoes.com",
+    "content": "Movie and TV show reviews, ratings, and critic scores aggregated from professional critics and audiences."
+  },
+  {
+    "id": "28",
+    "title": "IGN — Video Game News",
+    "url": "https://www.ign.com",
+    "content": "News, reviews, and guides covering video games, movies, and entertainment."
+  },
+  {
+    "id": "29",
+    "title": "Goodreads",
+    "url": "https://www.goodreads.com",
+    "content": "A social platform for book recommendations, reviews, and tracking reading progress."
+  },
+  {
+    "id": "30",
+    "title": "Spotify — Charts",
+    "url": "https://charts.spotify.com",
+    "content": "Weekly and daily charts showing the most streamed songs and albums on Spotify around the world."
+  },
+  {
+    "id": "31",
+    "title": "YouTube Trending",
+    "url": "https://www.youtube.com/feed/trending",
+    "content": "A feed of currently trending videos across music, entertainment, gaming, and news on YouTube."
+  },
+  {
+    "id": "32",
+    "title": "Reddit — r/todayilearned",
+    "url": "https://www.reddit.com/r/todayilearned",
+    "content": "A community for sharing interesting facts and things people recently learned, on all kinds of topics."
+  },
+  {
+    "id": "33",
+    "title": "Reddit — r/programming",
+    "url": "https://www.reddit.com/r/programming",
+    "content": "A community discussing programming news, articles, and projects across all languages and frameworks."
+  },
+  {
+    "id": "34",
+    "title": "9GAG",
+    "url": "https://9gag.com",
+    "content": "A platform for sharing memes, funny images, and viral content across a wide range of topics."
+  },
+  {
+    "id": "35",
+    "title": "TED Talks",
+    "url": "https://www.ted.com/talks",
+    "content": "A collection of talks from experts and speakers covering technology, science, culture, and ideas worth spreading."
+  },
+
+  {
+    "id": "36",
+    "title": "ESPN",
+    "url": "https://www.espn.com",
+    "content": "Sports news, scores, and highlights covering football, basketball, cricket, tennis, and more."
+  },
+  {
+    "id": "37",
+    "title": "BBC Sport",
+    "url": "https://www.bbc.com/sport",
+    "content": "Sports news and live coverage from the BBC, spanning football, rugby, cricket, and the Olympics."
+  },
+  {
+    "id": "38",
+    "title": "ICC Cricket",
+    "url": "https://www.icc-cricket.com",
+    "content": "Official news, rankings, and schedules for international cricket from the International Cricket Council."
+  },
+  {
+    "id": "39",
+    "title": "Formula 1 Official Site",
+    "url": "https://www.formula1.com",
+    "content": "News, standings, and race schedules for the Formula 1 World Championship."
+  },
+  {
+    "id": "40",
+    "title": "NBA Official Site",
+    "url": "https://www.nba.com",
+    "content": "News, scores, standings, and player stats from the National Basketball Association."
+  },
+
+  {
+    "id": "41",
+    "title": "BBC News",
+    "url": "https://www.bbc.com/news",
+    "content": "Breaking news and in-depth coverage of world events, politics, business, and technology."
+  },
+  {
+    "id": "42",
+    "title": "Reuters",
+    "url": "https://www.reuters.com",
+    "content": "International news coverage spanning business, markets, world events, and technology."
+  },
+  {
+    "id": "43",
+    "title": "The Verge",
+    "url": "https://www.theverge.com",
+    "content": "Technology news and reviews covering gadgets, science, and the impact of technology on culture."
+  },
+  {
+    "id": "44",
+    "title": "TechCrunch",
+    "url": "https://techcrunch.com",
+    "content": "News and analysis covering startups, venture capital, and the technology industry."
+  },
+  {
+    "id": "45",
+    "title": "Wired",
+    "url": "https://www.wired.com",
+    "content": "Articles on how technology is changing culture, business, science, and politics."
+  },
+
+  {
+    "id": "46",
+    "title": "AllRecipes",
+    "url": "https://www.allrecipes.com",
+    "content": "A large collection of user-submitted recipes, cooking tips, and meal ideas for every occasion."
+  },
+  {
+    "id": "47",
+    "title": "Lonely Planet — Travel Guides",
+    "url": "https://www.lonelyplanet.com",
+    "content": "Travel guides, destination tips, and itineraries for exploring countries and cities around the world."
+  },
+  {
+    "id": "48",
+    "title": "Investopedia",
+    "url": "https://www.investopedia.com",
+    "content": "Educational articles explaining financial concepts, investing strategies, and economic terms."
+  },
+  {
+    "id": "49",
+    "title": "WebMD",
+    "url": "https://www.webmd.com",
+    "content": "General health information, symptom guides, and wellness articles for everyday health questions."
+  },
+  {
+    "id": "50",
+    "title": "Duolingo",
+    "url": "https://www.duolingo.com",
+    "content": "A free language-learning platform offering interactive lessons in dozens of languages."
   }
 ]
