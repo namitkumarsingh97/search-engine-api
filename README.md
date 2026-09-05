@@ -1,6 +1,6 @@
-# MiniSearch — Backend API
+# Nexa — Backend API
 
-A small search engine built from scratch: crawler → tokenizer → inverted index → ranking → Express API. This is the backend for [MiniSearch](../search-engine-frontend); it owns crawling, indexing, search, and MongoDB storage.
+A small search engine built from scratch: crawler → tokenizer → inverted index → ranking → Express API. This is the backend for [Nexa](../search-engine-frontend); it owns crawling, indexing, search, and MongoDB storage.
 
 ## Stack
 
@@ -48,30 +48,30 @@ This runs the tokenizer/index/ranking pipeline directly against `data/documents.
 
 ## Environment variables
 
-| Variable | Description | Default |
-|---|---|---|
-| `PORT` | API port | `4000` |
-| `MONGODB_URI` | MongoDB connection string (Atlas or local) | `mongodb://127.0.0.1:27017/mini-search` |
-| `CRAWL_DELAY_MS` | Delay between crawler requests | `1000` |
-| `MAX_PAGES` | Max pages per crawl run | `100` |
-| `MAX_DEPTH` | Max link-following depth | `2` |
-| `CORS_ORIGIN` | Allowed frontend origin | `http://localhost:3000` |
+| Variable         | Description                                | Default                                 |
+| ---------------- | ------------------------------------------ | --------------------------------------- |
+| `PORT`           | API port                                   | `4000`                                  |
+| `MONGODB_URI`    | MongoDB connection string (Atlas or local) | `mongodb://127.0.0.1:27017/mini-search` |
+| `CRAWL_DELAY_MS` | Delay between crawler requests             | `1000`                                  |
+| `MAX_PAGES`      | Max pages per crawl run                    | `100`                                   |
+| `MAX_DEPTH`      | Max link-following depth                   | `2`                                     |
+| `CORS_ORIGIN`    | Allowed frontend origin                    | `http://localhost:3000`                 |
 
 If using MongoDB Atlas: whitelist your IP under **Network Access**, and include a database name in the URI path (e.g. `/mini-search`) or it'll default to `test`.
 
 ## API routes
 
-| Method | Route | Description |
-|---|---|---|
-| `GET` | `/api/health` | Health check |
-| `GET` | `/api/search?q=...` | Run a search query |
-| `GET` | `/api/search/autocomplete?q=...` | Prefix autocomplete over indexed terms |
-| `POST` | `/api/crawler/start` | Start a crawl — body: `{ seedUrls: string[] }` (must be full `http(s)` URLs) |
-| `POST` | `/api/crawler/stop` | Stop the current crawl |
-| `GET` | `/api/crawler/status` | Current crawler status |
-| `GET` | `/api/crawler/recent` | Recently crawled URLs and their status |
-| `GET` | `/api/stats` | Indexed pages, domains, terms, queue size |
-| `GET` | `/api/stats/top-queries` | Most frequent search queries |
+| Method | Route                            | Description                                                                  |
+| ------ | -------------------------------- | ---------------------------------------------------------------------------- |
+| `GET`  | `/api/health`                    | Health check                                                                 |
+| `GET`  | `/api/search?q=...`              | Run a search query                                                           |
+| `GET`  | `/api/search/autocomplete?q=...` | Prefix autocomplete over indexed terms                                       |
+| `POST` | `/api/crawler/start`             | Start a crawl — body: `{ seedUrls: string[] }` (must be full `http(s)` URLs) |
+| `POST` | `/api/crawler/stop`              | Stop the current crawl                                                       |
+| `GET`  | `/api/crawler/status`            | Current crawler status                                                       |
+| `GET`  | `/api/crawler/recent`            | Recently crawled URLs and their status                                       |
+| `GET`  | `/api/stats`                     | Indexed pages, domains, terms, queue size                                    |
+| `GET`  | `/api/stats/top-queries`         | Most frequent search queries                                                 |
 
 ## Project structure
 
@@ -114,13 +114,13 @@ src/
 
 ## Scripts
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start the API with hot reload (`tsx watch`) |
-| `npm run build` | Compile TypeScript to `dist/` |
-| `npm run start` | Run the compiled build |
+| Command                    | Description                                            |
+| -------------------------- | ------------------------------------------------------ |
+| `npm run dev`              | Start the API with hot reload (`tsx watch`)            |
+| `npm run build`            | Compile TypeScript to `dist/`                          |
+| `npm run start`            | Run the compiled build                                 |
 | `npm run search "<query>"` | CLI search against `data/documents.json`, no DB needed |
-| `npm run seed` | Load `data/documents.json` into MongoDB |
+| `npm run seed`             | Load `data/documents.json` into MongoDB                |
 
 ## Crawler rules
 

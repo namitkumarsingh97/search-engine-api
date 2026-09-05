@@ -24,10 +24,12 @@ async function loadIndexFromDatabase(): Promise<void> {
       content: page.content,
       headings: page.headings,
       domain: page.domain,
-    }))
+    })),
   );
 
-  console.log(`[server] loaded ${pages.length} pages from MongoDB into the search index`);
+  console.log(
+    `[server] loaded ${pages.length} pages from MongoDB into the search index`,
+  );
 }
 
 async function main() {
@@ -48,14 +50,19 @@ async function main() {
   // Catches errors thrown or rejected inside any route handler above and
   // returns a normal 500 instead of letting them crash the process.
   app.use(
-    (err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    (
+      err: unknown,
+      _req: express.Request,
+      res: express.Response,
+      _next: express.NextFunction,
+    ) => {
       console.error("[server] unhandled route error:", err);
       res.status(500).json({ error: "Internal server error" });
-    }
+    },
   );
 
   app.listen(PORT, () => {
-    console.log(`[server] MiniSearch API listening on http://localhost:${PORT}`);
+    console.log(`[server] Nexa API listening on http://localhost:${PORT}`);
   });
 }
 

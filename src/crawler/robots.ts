@@ -17,7 +17,7 @@ function parseRobotsTxt(text: string): RobotsRules {
     const lowerKey = key.trim().toLowerCase();
 
     if (lowerKey === "user-agent") {
-      appliesToUs = value === "*" || value.toLowerCase() === "minisearchbot";
+      appliesToUs = value === "*" || value.toLowerCase() === "nexabot";
     } else if (lowerKey === "disallow" && appliesToUs && value) {
       disallowedPaths.push(value);
     }
@@ -47,12 +47,12 @@ async function getRobotsRules(origin: string): Promise<RobotsRules> {
   return rules;
 }
 
-/** Checks whether MiniSearchBot is allowed to fetch the given URL. */
+/** Checks whether NexaBot is allowed to fetch the given URL. */
 export async function isAllowedByRobots(url: string): Promise<boolean> {
   const parsed = new URL(url);
   const rules = await getRobotsRules(parsed.origin);
 
   return !rules.disallowedPaths.some((disallowed) =>
-    parsed.pathname.startsWith(disallowed)
+    parsed.pathname.startsWith(disallowed),
   );
 }

@@ -8,7 +8,7 @@ const MAX_PAGES = Number(process.env.MAX_PAGES ?? 100);
 const MAX_DEPTH = Number(process.env.MAX_DEPTH ?? 2);
 const CRAWL_DELAY_MS = Number(process.env.CRAWL_DELAY_MS ?? 1000);
 const FETCH_TIMEOUT_MS = 10_000;
-const USER_AGENT = "MiniSearchBot/0.1 (+https://example.com/bot)";
+const USER_AGENT = "NexaBot/0.1 (+https://example.com/bot)";
 
 export interface CrawlerStatus {
   running: boolean;
@@ -97,7 +97,7 @@ class Crawler {
           domain,
           crawledAt: new Date(),
         },
-        { upsert: true, new: true }
+        { upsert: true, new: true },
       );
 
       searchIndex.addDocument({
