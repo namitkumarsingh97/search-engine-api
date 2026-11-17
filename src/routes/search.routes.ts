@@ -7,11 +7,29 @@ import { refreshNewsIndexIfChanged } from "../news/sync";
 import { parseQuery } from "../search/query";
 import { searchIndex } from "../search/indexer";
 import { autocomplete, runSearch } from "../search/search";
-import { DOC_TYPES, DocType } from "../types";
+import { DOC_TYPES, DocType, ScoredResult } from "../types";
 
 export const searchRouter = Router();
 
 const MAX_QUERY_LENGTH = 200;
+
+/**
+ * Mail lives in its own service (search-engine-mail). Searching it means asking that service,
+ * passing along the user's own login token, so it can only ever return that user's mail.
+ * Any problem (not configured, slow, down) just means no mail results: it never breaks search.
+ */
+async function searchMail(authorization: string | undefined, words: string, page: number, pageSize: number) {
+  const base = process.env.MAIL_SERVICE_URL?.replace(/\/$/, "");
+  if (!base || !authorization || !words.trim()) return null;
+  try {
+    const params = new URLSearchParams({ q: words, page: String(page), pageSize: String(pageSize) });
+    const res = await fetch(`${base}/search?${params.toString()}`, { headers: { Authorization: authorization }, signal: AbortSignal.timeout(2500) });
+    if (!res.ok) return null;
+    return (await res.json()) as { total: number; page: number; pageSize: number; items: ScoredResult[] };
+  } catch {
+    return null;
+  }
+}
 
 /** A signed-in user's most recent distinct queries, newest first. */
 async function recentQueries(userId: string, limit: number): Promise<string[]> {
@@ -74,13 +92,35 @@ searchRouter.get(
     // Pick up news the processor stored since we last looked (throttled; a hiccup here must not break search).
     await refreshNewsIndexIfChanged().catch(() => undefined);
 
+    const page = Number(req.query.page) || 1;
+    const pageSize = Number(req.query.pageSize) || 10;
+    const parsed = parseQuery(q);
+    const effectiveType = rawType === "all" ? parsed.type : (rawType as DocType);
+
     const response = runSearch(searchIndex, q, {
       type: rawType === "all" ? undefined : (rawType as DocType),
       viewerId: req.userId,
-      page: Number(req.query.page) || 1,
-      pageSize: Number(req.query.pageSize) || 10,
+      page,
+      pageSize,
       sort,
     });
+
+    // The signed-in person's own mail. On the Mail tab it IS the result list; elsewhere only the
+    // top few (shown as a shelf on All) and the count (for the tab badge) are needed.
+    const wantsMailList = effectiveType === "mail";
+    const mailHits = await searchMail(req.headers.authorization, parsed.terms.join(" "), wantsMailList ? page : 1, wantsMailList ? pageSize : 3);
+    let mail: ScoredResult[] = [];
+    if (mailHits) {
+      response.facets.mail = mailHits.total;
+      if (wantsMailList) {
+        response.results = mailHits.items;
+        response.total = mailHits.total;
+        response.page = mailHits.page;
+        response.pageSize = mailHits.pageSize;
+      } else if (!effectiveType && page === 1) {
+        mail = mailHits.items;
+      }
+    }
 
     // Log the main search only (not tab switches or page turns), for history and analytics.
     if (rawType === "all" && response.page === 1) {
@@ -92,7 +132,7 @@ searchRouter.get(
     // Nexa apps (the owner's own projects) that match the words typed, shown as a shelf above results.
     const apps = response.page === 1 && rawType === "all" ? matchApps(parseQuery(q).terms) : [];
 
-    res.json({ ...response, apps });
+    res.json({ ...response, apps, mail });
   }),
 );
 

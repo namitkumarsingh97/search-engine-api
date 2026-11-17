@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { createHash, randomBytes } from "crypto";
 import { Request, Response, Router } from "express";
+import { addressOf, generateHandle, handleProblem, normalizeHandle } from "../auth/handle";
 import { AuthCode } from "../database/models/AuthCode";
 import { User, UserDocument } from "../database/models/User";
 import { asyncHandler } from "../middleware/asyncHandler";
@@ -20,7 +21,14 @@ const authLimiter = rateLimit({
 });
 
 async function publicUser(u: UserDocument) {
-  return { id: String(u._id), email: u.email, name: u.name, isAdmin: await isAdminUser(u) };
+  return {
+    id: String(u._id),
+    email: u.email,
+    name: u.name,
+    handle: u.handle ?? null,
+    address: u.handle ? addressOf(u.handle) : null,
+    isAdmin: await isAdminUser(u),
+  };
 }
 
 // ---- Sign-in through a separate accounts app ------------------------------------------
@@ -92,8 +100,26 @@ authRouter.post("/register", authLimiter, asyncHandler(async (req, res) => {
     return res.status(409).json({ error: "An account with this email already exists" });
   }
 
+  // The person's Nexa mail address: the one they asked for, or one made from their name.
+  let handle: string;
+  if (req.body?.handle !== undefined && String(req.body.handle).trim() !== "") {
+    handle = normalizeHandle(req.body.handle);
+    const problem = handleProblem(handle);
+    if (problem) return res.status(400).json({ error: problem });
+    if (await User.exists({ handle })) return res.status(409).json({ error: "That Nexa address is already taken" });
+  } else {
+    handle = await generateHandle(name, email);
+  }
+
   const passwordHash = await bcrypt.hash(password, 10);
-  const user = await User.create({ email, name, passwordHash });
+  let user: UserDocument;
+  try {
+    user = await User.create({ email, name, handle, passwordHash });
+  } catch (err) {
+    // Lost a race for the same handle between the check above and the insert.
+    if ((err as { code?: number }).code === 11000) return res.status(409).json({ error: "That Nexa address is already taken" });
+    throw err;
+  }
 
   await respondSignedIn(res, user, 201, redirect.uri);
 }));
@@ -130,6 +156,17 @@ authRouter.post("/exchange", authLimiter, asyncHandler(async (req, res) => {
   const user = await User.findById(record.userId);
   if (!user) return res.status(400).json({ error: "Invalid or expired sign-in code." });
   res.json({ token: signToken(String(user._id)), user: await publicUser(user) });
+}));
+
+// GET /api/auth/handle-available?handle=ada  — for the sign-up form (public, rate limited)
+const handleCheckLimiter = rateLimit({ windowMs: 60_000, max: 60, message: "Too many checks. Wait a moment." });
+authRouter.get("/handle-available", handleCheckLimiter, asyncHandler(async (req, res) => {
+  const handle = normalizeHandle(req.query.handle);
+  if (!handle) return res.json({ available: false, error: "Choose a name for your address." });
+  const problem = handleProblem(handle);
+  if (problem) return res.json({ available: false, error: problem });
+  const taken = await User.exists({ handle });
+  res.json({ available: !taken, address: addressOf(handle), error: taken ? "That address is already taken." : null });
 }));
 
 // GET /api/auth/me
