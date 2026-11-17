@@ -74,28 +74,42 @@ export function matchApps(queryTerms: string[], limit = 3): PublicApp[] {
 
 // ---- First-run content -----------------------------------------------------------
 
-/** Adds the default apps once, ever. Deleting one later keeps it deleted. */
+/** The owner's products. Added to a brand-new database once; after that, manage them in /admin/apps. */
+const DEFAULT_PRODUCTS = [
+  {
+    slug: "wfms",
+    name: "WFMS",
+    tagline: "Open the WFMS workspace",
+    description: "WFMS, built into Nexa.",
+    url: "https://pa-wfms.vercel.app",
+    icon: "briefcase",
+    tone: "orange",
+    keywords: ["wfms"],
+    openInNewTab: false,
+    visible: true,
+    order: 10,
+  },
+  {
+    slug: "ecotrack-india",
+    name: "EcoTrack India",
+    tagline: "ESG reporting for Indian SMBs",
+    description: "Track sustainability metrics, calculate ESG scores and generate compliance-ready reports.",
+    url: "https://ecotrack-india.vercel.app",
+    icon: "leaf",
+    tone: "mustard",
+    keywords: ["ecotrack", "esg", "sustainability", "brsr"],
+    openInNewTab: false,
+    visible: true,
+    order: 20,
+  },
+];
+
+/** Adds the default products once, ever. Deleting one later keeps it deleted. */
 export async function seedDefaultApps(): Promise<void> {
   if (await Meta.findOne({ key: "apps_seeded" })) return;
 
-  await AppEntry.updateOne(
-    { slug: "wfms" },
-    {
-      $setOnInsert: {
-        slug: "wfms",
-        name: "WFMS",
-        tagline: "Open the WFMS workspace",
-        description: "WFMS, built into Nexa.",
-        url: "https://pa-wfms.vercel.app",
-        icon: "briefcase",
-        tone: "orange",
-        keywords: ["wfms"],
-        openInNewTab: false,
-        visible: true,
-        order: 10,
-      },
-    },
-    { upsert: true },
-  );
+  for (const product of DEFAULT_PRODUCTS) {
+    await AppEntry.updateOne({ slug: product.slug }, { $setOnInsert: product }, { upsert: true });
+  }
   await Meta.create({ key: "apps_seeded", value: new Date().toISOString() });
 }

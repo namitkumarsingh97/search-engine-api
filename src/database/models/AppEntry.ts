@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document as MongoDocument } from "mongoose";
 
 /**
- * A "Nexa app": one of the owner's own projects, presented as a feature of
+ * A "Nexa app": one of the owner's own products, presented as a feature of
  * Nexa (like Drive or Calendar) that routes to its deployed URL on click.
  */
 export interface AppEntryDocument extends MongoDocument {
