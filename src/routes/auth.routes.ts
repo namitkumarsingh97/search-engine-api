@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { createHash, randomBytes } from "crypto";
 import { Request, Response, Router } from "express";
-import { addressOf, generateHandle, handleProblem, normalizeHandle } from "../auth/handle";
+import { addressOf, generateHandle, handleProblem, MAIL_DOMAIN, normalizeHandle } from "../auth/handle";
 import { AuthCode } from "../database/models/AuthCode";
 import { User, UserDocument } from "../database/models/User";
 import { asyncHandler } from "../middleware/asyncHandler";
@@ -10,8 +10,6 @@ import { AuthedRequest, requireAuth, signToken } from "../middleware/auth";
 import { rateLimit } from "../middleware/rateLimit";
 
 export const authRouter = Router();
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Slows down password guessing and mass sign-ups from one address.
 const authLimiter = rateLimit({
@@ -81,23 +79,19 @@ async function respondSignedIn(res: Response, user: UserDocument, status: number
   return res.status(status).json({ code, expiresIn: CODE_TTL_MS / 1000 });
 }
 
-// POST /api/auth/register  { email, name, password }
+// POST /api/auth/register  { name, handle?, password }
+// A Nexa account IS its Nexa address (handle@nexa.com): sign-up never asks for an outside email
+// (Gmail, Yahoo...), and any `email` sent is ignored. The address is also the login name.
 authRouter.post("/register", authLimiter, asyncHandler(async (req, res) => {
   const redirect = readRedirect(req, res);
   if (!redirect.ok) return;
 
-  const email = String(req.body?.email ?? "").trim().toLowerCase();
   const name = String(req.body?.name ?? "").trim();
   const password = String(req.body?.password ?? "");
 
-  if (!EMAIL_RE.test(email)) return res.status(400).json({ error: "Valid email is required" });
   if (!name) return res.status(400).json({ error: "Name is required" });
   if (password.length < 8) {
     return res.status(400).json({ error: "Password must be at least 8 characters" });
-  }
-
-  if (await User.exists({ email })) {
-    return res.status(409).json({ error: "An account with this email already exists" });
   }
 
   // The person's Nexa mail address: the one they asked for, or one made from their name.
@@ -108,15 +102,16 @@ authRouter.post("/register", authLimiter, asyncHandler(async (req, res) => {
     if (problem) return res.status(400).json({ error: problem });
     if (await User.exists({ handle })) return res.status(409).json({ error: "That Nexa address is already taken" });
   } else {
-    handle = await generateHandle(name, email);
+    handle = await generateHandle(name, "");
   }
+  const email = addressOf(handle);
 
   const passwordHash = await bcrypt.hash(password, 10);
   let user: UserDocument;
   try {
     user = await User.create({ email, name, handle, passwordHash });
   } catch (err) {
-    // Lost a race for the same handle between the check above and the insert.
+    // Lost a race for the same address between the check above and the insert.
     if ((err as { code?: number }).code === 11000) return res.status(409).json({ error: "That Nexa address is already taken" });
     throw err;
   }
@@ -124,18 +119,21 @@ authRouter.post("/register", authLimiter, asyncHandler(async (req, res) => {
   await respondSignedIn(res, user, 201, redirect.uri);
 }));
 
-// POST /api/auth/login  { email, password }
+// POST /api/auth/login  { email, password }   (`email` is the Nexa address; "ada", "ada@nexa.com" both work)
+// Accounts made before Nexa addresses existed can still sign in with the outside email they signed up with.
 authRouter.post("/login", authLimiter, asyncHandler(async (req, res) => {
   const redirect = readRedirect(req, res);
   if (!redirect.ok) return;
 
-  const email = String(req.body?.email ?? "").trim().toLowerCase();
+  const login = String(req.body?.email ?? req.body?.identifier ?? "").trim().toLowerCase();
   const password = String(req.body?.password ?? "");
 
-  const user = await User.findOne({ email });
-  // Same message for unknown email and wrong password, so accounts can't be enumerated.
+  // "ada" or "ada@nexa.com" -> the Nexa address; anything else is an older account's outside email.
+  const isNexa = !login.includes("@") || login.endsWith(`@${MAIL_DOMAIN}`);
+  const user = login ? await User.findOne(isNexa ? { handle: normalizeHandle(login) } : { email: login }) : null;
+  // Same message for unknown address and wrong password, so accounts can't be enumerated.
   if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
-    return res.status(401).json({ error: "Invalid email or password" });
+    return res.status(401).json({ error: "Invalid Nexa address or password" });
   }
 
   await respondSignedIn(res, user, 200, redirect.uri);
