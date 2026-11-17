@@ -7,7 +7,7 @@ import { connectDatabase } from "./database/connection";
 import { Page } from "./database/models/Page";
 import { loadDriveIntoIndex } from "./drive/indexing";
 import { loadMailIntoIndex } from "./mail/indexing";
-import { reindexNews, syncNews } from "./news/sync";
+import { newsSyncIsExternal, reindexNews, syncNews } from "./news/sync";
 import { adminRouter } from "./routes/admin.routes";
 import { appsRouter } from "./routes/apps.routes";
 import { authRouter } from "./routes/auth.routes";
@@ -148,9 +148,11 @@ if (!ON_VERCEL) {
         console.log(`[server] Nexa API listening on http://localhost:${PORT}`);
       });
       // A normal host can refresh news in the background; on Vercel it happens when /api/news is requested.
-      const refresh = () => syncNews().catch((err) => console.error("[news] sync failed:", err));
-      refresh();
-      setInterval(refresh, 30 * 60_000).unref();
+      if (!newsSyncIsExternal()) {
+        const refresh = () => syncNews().catch((err) => console.error("[news] sync failed:", err));
+        refresh();
+        setInterval(refresh, 3 * 60 * 60_000).unref();
+      }
     })
     .catch((err) => {
       console.error("[server] failed to start:", err);

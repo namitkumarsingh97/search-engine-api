@@ -3,6 +3,7 @@ import { SearchHistory } from "../database/models/SearchHistory";
 import { asyncHandler } from "../middleware/asyncHandler";
 import { AuthedRequest, optionalAuth, requireAuth } from "../middleware/auth";
 import { matchApps } from "../apps/registry";
+import { refreshNewsIndexIfChanged } from "../news/sync";
 import { parseQuery } from "../search/query";
 import { searchIndex } from "../search/indexer";
 import { autocomplete, runSearch } from "../search/search";
@@ -69,6 +70,9 @@ searchRouter.get(
       return res.status(400).json({ error: `Unknown type '${rawType}'` });
     }
     const sort = req.query.sort === "date" ? "date" : "relevance";
+
+    // Pick up news the processor stored since we last looked (throttled; a hiccup here must not break search).
+    await refreshNewsIndexIfChanged().catch(() => undefined);
 
     const response = runSearch(searchIndex, q, {
       type: rawType === "all" ? undefined : (rawType as DocType),

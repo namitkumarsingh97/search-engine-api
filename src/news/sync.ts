@@ -6,8 +6,34 @@ import { searchIndex } from "../search/indexer";
 const DAY_MS = 86_400_000;
 /** How far back the first sync looks: news is "recent changes", not a full history. */
 const BACKFILL_DAYS = 90;
-const REFRESH_MS = Number(process.env.NEWS_REFRESH_MINUTES ?? 15) * 60_000;
+// News is "what changed in the products", not a live ticker: checking every 3 hours is plenty.
+const REFRESH_MS = Number(process.env.NEWS_REFRESH_MINUTES ?? 180) * 60_000;
 const MAX_PER_REPO = 30;
+
+/**
+ * When the separate Nexa processor (search-engine-processor) does the GitHub syncing, set
+ * NEWS_SYNC_EXTERNAL=1. This API then never calls GitHub itself: it only reloads its
+ * in-memory search index when the processor has stored new news.
+ */
+export const newsSyncIsExternal = (): boolean => process.env.NEWS_SYNC_EXTERNAL === "1";
+const INDEX_CHECK_MS = Number(process.env.NEWS_INDEX_CHECK_SECONDS ?? 60) * 1000;
+
+let lastSeenSync = "";
+let lastCheckedAt = 0;
+
+/**
+ * Cheap, throttled check: has the processor stamped a newer `news_last_sync` than the one
+ * this process last indexed? If so, rebuild the news part of the search index.
+ */
+export async function refreshNewsIndexIfChanged(): Promise<void> {
+  if (Date.now() - lastCheckedAt < INDEX_CHECK_MS) return;
+  lastCheckedAt = Date.now();
+  const stamp = (await Meta.findOne({ key: "news_last_sync" }))?.value ?? "";
+  if (stamp !== lastSeenSync) {
+    lastSeenSync = stamp;
+    await reindexNews();
+  }
+}
 
 interface GithubCommit {
   sha: string;
@@ -142,6 +168,9 @@ async function doSync(): Promise<SyncResult> {
  * This keeps the feed automatic without a background job, which serverless hosts don't have.
  */
 export async function ensureFresh(): Promise<void> {
+  // The processor owns syncing: just make sure our search index reflects what it stored.
+  if (newsSyncIsExternal()) return refreshNewsIndexIfChanged();
+
   const last = Number((await Meta.findOne({ key: "news_last_sync" }))?.value ?? 0);
   if (Date.now() - last < REFRESH_MS) return;
 
