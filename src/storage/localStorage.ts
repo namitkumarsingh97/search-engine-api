@@ -19,7 +19,11 @@ export interface FileStorage {
   remove(key: string): Promise<void>;
 }
 
-const ROOT = path.resolve(process.env.STORAGE_DIR ?? path.join(process.cwd(), "storage"));
+// On Vercel the project folder is read-only and only /tmp is writable (and it is
+// wiped between invocations), so uploads there are temporary. Use a host with a
+// persistent disk, or cloud storage, for real file storage.
+const DEFAULT_ROOT = process.env.VERCEL ? "/tmp/nexa-storage" : path.join(process.cwd(), "storage");
+const ROOT = path.resolve(process.env.STORAGE_DIR ?? DEFAULT_ROOT);
 
 class LocalDiskStorage implements FileStorage {
   uploadDir(ownerId: string): string {

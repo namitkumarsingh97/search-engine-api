@@ -1,8 +1,15 @@
 import fs from "fs";
 import path from "path";
-// Import the inner module: pdf-parse's index.js runs a debug routine when it has no parent.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const pdfParse: (buf: Buffer) => Promise<{ text: string }> = require("pdf-parse/lib/pdf-parse.js");
+/**
+ * Loaded on first use, not at startup: pdf-parse pulls in its PDF engine through a
+ * computed path, which some bundlers (Vercel) miss. Doing it lazily means a problem
+ * there can only affect PDF text extraction, never the whole API starting up.
+ * (The inner module is imported because pdf-parse's index.js runs a debug routine.)
+ */
+function loadPdfParse(): (buf: Buffer) => Promise<{ text: string }> {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  return require("pdf-parse/lib/pdf-parse.js");
+}
 
 const MAX_TEXT_CHARS = 200_000;
 const MAX_PDF_BYTES = 25 * 1024 * 1024;
@@ -31,7 +38,7 @@ export async function extractText(filePath: string, name: string, mimeType: stri
     if (mimeType === "application/pdf" || ext === ".pdf") {
       const stat = await fs.promises.stat(filePath);
       if (stat.size > MAX_PDF_BYTES) return "";
-      const parsed = await pdfParse(await fs.promises.readFile(filePath));
+      const parsed = await loadPdfParse()(await fs.promises.readFile(filePath));
       return parsed.text.replace(/\s+/g, " ").trim().slice(0, MAX_TEXT_CHARS);
     }
   } catch (err) {
