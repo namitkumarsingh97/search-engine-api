@@ -20,6 +20,8 @@ export interface AppEntryDocument extends MongoDocument {
   openInNewTab: boolean;
   visible: boolean;
   order: number;
+  /** Public GitHub repos ("owner/name") whose commits become this product's news. */
+  repos: string[];
 }
 
 const appEntrySchema = new Schema<AppEntryDocument>(
@@ -35,6 +37,7 @@ const appEntrySchema = new Schema<AppEntryDocument>(
     openInNewTab: { type: Boolean, default: false },
     visible: { type: Boolean, default: true },
     order: { type: Number, default: 100 },
+    repos: { type: [String], default: [] },
   },
   { timestamps: true },
 );

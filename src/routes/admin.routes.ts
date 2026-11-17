@@ -15,7 +15,7 @@ adminRouter.get(
   requireAdmin,
   asyncHandler(async (_req, res) => {
     const docs = searchIndex.getAllDocuments();
-    const documentsByType: Record<string, number> = { web: 0, file: 0, mail: 0, event: 0, video: 0 };
+    const documentsByType: Record<string, number> = { web: 0, file: 0, mail: 0, event: 0, video: 0, news: 0 };
     const domains = new Set<string>();
     for (const d of docs) {
       const type = d.type ?? "web";

@@ -7,6 +7,7 @@ import { connectDatabase } from "./database/connection";
 import { Page } from "./database/models/Page";
 import { loadDriveIntoIndex } from "./drive/indexing";
 import { loadMailIntoIndex } from "./mail/indexing";
+import { reindexNews, syncNews } from "./news/sync";
 import { adminRouter } from "./routes/admin.routes";
 import { appsRouter } from "./routes/apps.routes";
 import { authRouter } from "./routes/auth.routes";
@@ -14,6 +15,7 @@ import { calendarRouter } from "./routes/calendar.routes";
 import { crawlerRouter } from "./routes/crawler.routes";
 import { driveRouter } from "./routes/drive.routes";
 import { mailRouter } from "./routes/mail.routes";
+import { newsRouter } from "./routes/news.routes";
 import { searchRouter } from "./routes/search.routes";
 import { videoRouter } from "./routes/video.routes";
 import { searchIndex } from "./search/indexer";
@@ -73,6 +75,7 @@ function init(): Promise<void> {
       console.log(`[server] loaded ${await loadMailIntoIndex()} mail items into the search index`);
       await seedDefaultApps();
       await refreshAppCache();
+      console.log(`[server] loaded ${await reindexNews()} news items into the search index`);
     })();
     ready.catch(() => {
       ready = null;
@@ -117,6 +120,7 @@ app.use("/api/videos", videoRouter);
 app.use("/api/calendar", calendarRouter);
 app.use("/api/mail", mailRouter);
 app.use("/api/apps", appsRouter);
+app.use("/api/news", newsRouter);
 app.use("/api/search", searchRouter);
 app.use("/api/crawler", crawlerRouter);
 app.use("/api", adminRouter);
@@ -143,6 +147,10 @@ if (!ON_VERCEL) {
       app.listen(PORT, () => {
         console.log(`[server] Nexa API listening on http://localhost:${PORT}`);
       });
+      // A normal host can refresh news in the background; on Vercel it happens when /api/news is requested.
+      const refresh = () => syncNews().catch((err) => console.error("[news] sync failed:", err));
+      refresh();
+      setInterval(refresh, 30 * 60_000).unref();
     })
     .catch((err) => {
       console.error("[server] failed to start:", err);

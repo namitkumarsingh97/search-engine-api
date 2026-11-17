@@ -88,6 +88,7 @@ const DEFAULT_PRODUCTS = [
     openInNewTab: false,
     visible: true,
     order: 10,
+    repos: ["namitkumarsingh97/PA_WFMS"],
   },
   {
     slug: "ecotrack-india",
@@ -101,6 +102,7 @@ const DEFAULT_PRODUCTS = [
     openInNewTab: false,
     visible: true,
     order: 20,
+    repos: ["namitkumarsingh97/ecotrack-india-landing"],
   },
   {
     slug: "namit-singh",
@@ -114,6 +116,7 @@ const DEFAULT_PRODUCTS = [
     openInNewTab: false,
     visible: true,
     order: 30,
+    repos: ["namitkumarsingh97/namit-singh-portfolio"],
   },
   {
     slug: "kumari-pooja",
@@ -127,6 +130,7 @@ const DEFAULT_PRODUCTS = [
     openInNewTab: false,
     visible: true,
     order: 40,
+    repos: ["namitkumarsingh97/pooja-seo-portfolio", "namitkumarsingh97/pooja-seo-portfolio-server"],
   },
 ];
 

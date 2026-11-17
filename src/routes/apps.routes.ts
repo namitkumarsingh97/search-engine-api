@@ -1,6 +1,7 @@
 import { Router } from "express";
 import mongoose from "mongoose";
 import { isSafeUrl, listVisibleApps, refreshAppCache, toPublicApp } from "../apps/registry";
+import { reindexNews } from "../news/sync";
 import { AppEntry, AppEntryDocument } from "../database/models/AppEntry";
 import { requireAdmin } from "../middleware/admin";
 import { asyncHandler } from "../middleware/asyncHandler";
@@ -21,6 +22,7 @@ const slugify = (s: string) =>
 const adminDto = (a: AppEntryDocument) => ({
   ...toPublicApp(a),
   keywords: a.keywords,
+  repos: a.repos,
   visible: a.visible,
   order: a.order,
 });
@@ -47,6 +49,15 @@ function readFields(body: Record<string, unknown>, partial: boolean): { error: s
   if (body.keywords !== undefined) {
     const list = Array.isArray(body.keywords) ? body.keywords : String(body.keywords).split(",");
     f.keywords = [...new Set(list.map((k) => String(k).trim().toLowerCase()).filter(Boolean))].slice(0, 20);
+  }
+  if (body.repos !== undefined) {
+    const list = Array.isArray(body.repos) ? body.repos : String(body.repos).split(/[,\s]+/);
+    const repos = [...new Set(list.map((r) => String(r).trim()).filter(Boolean))];
+    if (repos.length > 5) return { error: "At most 5 repos per product" };
+    if (repos.some((r) => !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(r))) {
+      return { error: 'Repos must look like "owner/name"' };
+    }
+    f.repos = repos;
   }
   if (body.openInNewTab !== undefined) f.openInNewTab = Boolean(body.openInNewTab);
   if (body.visible !== undefined) f.visible = Boolean(body.visible);
@@ -87,6 +98,7 @@ appsRouter.post(
 
     const app = await AppEntry.create({ ...parsed.fields, slug });
     await refreshAppCache();
+    await reindexNews();
     res.status(201).json(adminDto(app));
   }),
 );
@@ -105,6 +117,7 @@ appsRouter.patch(
     app.set(parsed.fields);
     await app.save();
     await refreshAppCache();
+    await reindexNews();
     res.json(adminDto(app));
   }),
 );
@@ -118,6 +131,7 @@ appsRouter.delete(
     if (!app) return res.status(404).json({ error: "App not found" });
     await app.deleteOne();
     await refreshAppCache();
+    await reindexNews();
     res.json({ deleted: true });
   }),
 );

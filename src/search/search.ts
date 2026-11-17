@@ -21,7 +21,7 @@ export function isVisible(doc: Document, viewerId?: string): boolean {
   return !doc.ownerId || doc.ownerId === viewerId;
 }
 
-const emptyFacets = (): SearchFacets => ({ all: 0, web: 0, file: 0, mail: 0, event: 0, video: 0 });
+const emptyFacets = (): SearchFacets => ({ all: 0, web: 0, file: 0, mail: 0, event: 0, video: 0, news: 0 });
 
 function hostOf(url: string): string {
   try {

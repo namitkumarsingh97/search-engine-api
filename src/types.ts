@@ -1,6 +1,6 @@
-export type DocType = "web" | "file" | "mail" | "event" | "video";
+export type DocType = "web" | "file" | "mail" | "event" | "video" | "news";
 
-export const DOC_TYPES: DocType[] = ["web", "file", "mail", "event", "video"];
+export const DOC_TYPES: DocType[] = ["web", "file", "mail", "event", "video", "news"];
 
 export interface Document {
   id: string;
