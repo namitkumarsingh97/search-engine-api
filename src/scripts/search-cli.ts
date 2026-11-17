@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { SearchIndex } from "../search/indexer";
 import { runSearch } from "../search/search";
-import { Document } from "../types";
+import { Document, MARK_CLOSE, MARK_OPEN } from "../types";
 
 function loadSampleDocuments(): Document[] {
   const filePath = path.join(__dirname, "..", "..", "data", "documents.json");
@@ -26,11 +26,13 @@ function main() {
   console.log(`\nSearch results for: ${response.query}`);
   console.log(`(${response.total} results, ${response.tookMs}ms)\n`);
 
+  if (response.suggestion) console.log(`Did you mean: ${response.suggestion}?\n`);
+
   response.results.forEach((result, i) => {
     console.log(`${i + 1}. ${result.title}`);
     console.log(`   ${result.url}`);
     console.log(`   score: ${result.score}`);
-    console.log(`   ${result.snippet}\n`);
+    console.log(`   ${result.snippet.split(MARK_OPEN).join("**").split(MARK_CLOSE).join("**")}\n`);
   });
 }
 

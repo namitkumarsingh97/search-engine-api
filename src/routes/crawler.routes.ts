@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { crawler } from "../crawler/crawler";
 import { CrawlQueue } from "../database/models/CrawlQueue";
+import { requireAdmin } from "../middleware/admin";
 
 export const crawlerRouter = Router();
 
 // POST /api/crawler/start  { seedUrls: string[] }
-crawlerRouter.post("/start", async (req, res) => {
+crawlerRouter.post("/start", requireAdmin, async (req, res) => {
   const seedUrls = req.body?.seedUrls;
 
   if (!Array.isArray(seedUrls) || seedUrls.length === 0) {
@@ -35,18 +36,18 @@ function isValidHttpUrl(value: unknown): boolean {
 }
 
 // POST /api/crawler/stop
-crawlerRouter.post("/stop", (_req, res) => {
+crawlerRouter.post("/stop", requireAdmin, (_req, res) => {
   crawler.requestStop();
   res.json({ stopped: true });
 });
 
 // GET /api/crawler/status
-crawlerRouter.get("/status", (_req, res) => {
+crawlerRouter.get("/status", requireAdmin, (_req, res) => {
   res.json(crawler.getStatus());
 });
 
 // GET /api/crawler/recent
-crawlerRouter.get("/recent", async (_req, res) => {
+crawlerRouter.get("/recent", requireAdmin, async (_req, res) => {
   const recent = await CrawlQueue.find({ status: { $ne: "queued" } })
     .sort({ crawledAt: -1 })
     .limit(20)

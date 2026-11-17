@@ -102,6 +102,7 @@ class Crawler {
 
       searchIndex.addDocument({
         id: (page._id as { toString(): string }).toString(),
+        type: "web",
         title: parsed.title || url,
         url,
         content: parsed.content,

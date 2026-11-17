@@ -1,93 +1,103 @@
-import { Document } from "../types";
-import { tokenize } from "./tokenizer";
+import { DocType, MARK_CLOSE, MARK_OPEN } from "../types";
 
-const WEIGHTS = {
-  title: 5,
-  heading: 3,
-  url: 2,
-  body: 1,
-};
+// ---- BM25 -------------------------------------------------------------------
+// The standard probabilistic ranking function. A term counts for more when it
+// is rare across the index (idf) and frequent in the document, with
+// diminishing returns (k1) and a penalty for very long documents (b).
+const K1 = 1.2;
+const B = 0.75;
 
-function countMatches(haystackTokens: string[], queryTerms: string[]): number {
-  let count = 0;
-  for (const term of queryTerms) {
-    for (const token of haystackTokens) {
-      if (token === term) count++;
-    }
-  }
-  return count;
+export function idf(totalDocs: number, docsWithTerm: number): number {
+  return Math.log(1 + (totalDocs - docsWithTerm + 0.5) / (docsWithTerm + 0.5));
 }
+
+export function bm25Term(weightedTf: number, docLength: number, avgDocLength: number): number {
+  const norm = 1 - B + B * (docLength / (avgDocLength || 1));
+  return (weightedTf * (K1 + 1)) / (weightedTf + K1 * norm);
+}
+
+// ---- Recency ----------------------------------------------------------------
+
+const DAY_MS = 86_400_000;
 
 /**
- * Phase 5 scoring: weight matches by where they occur.
- * A hit in the title counts for more than a hit in the body.
- * This is intentionally simple — see scoreTfIdf below for the next step up.
+ * Personal content is usually wanted fresh: newer mail, uploads and videos get a
+ * small boost, and events near today beat events years away. Web pages have no
+ * meaningful date, so they are untouched.
  */
-export function scoreSimple(doc: Document, queryTerms: string[]): number {
-  const titleTokens = tokenize(doc.title);
-  const headingTokens = tokenize(doc.headings ?? "");
-  const urlTokens = tokenize(doc.url);
-  const bodyTokens = tokenize(doc.content);
+export function recencyBoost(type: DocType, dateIso: string | undefined, now = Date.now()): number {
+  if (!dateIso || type === "web") return 1;
+  const t = Date.parse(dateIso);
+  if (Number.isNaN(t)) return 1;
 
-  const titleScore = countMatches(titleTokens, queryTerms) * WEIGHTS.title;
-  const headingScore = countMatches(headingTokens, queryTerms) * WEIGHTS.heading;
-  const urlScore = countMatches(urlTokens, queryTerms) * WEIGHTS.url;
-  const bodyScore = countMatches(bodyTokens, queryTerms) * WEIGHTS.body;
-
-  return titleScore + headingScore + urlScore + bodyScore;
+  if (type === "event") {
+    const distanceDays = Math.abs(t - now) / DAY_MS;
+    return 1 + 0.35 * Math.exp(-distanceDays / 30);
+  }
+  const ageDays = Math.max(0, (now - t) / DAY_MS);
+  return 1 + 0.35 * Math.exp(-ageDays / 120);
 }
 
-/**
- * Phase 14, step 2: TF-IDF scoring.
- * termFrequency = how often the term appears in this doc
- * inverseDocFrequency = how rare the term is across the whole corpus
- * (rare terms that match are more informative than common ones)
- *
- * `totalDocs` and `docsContainingTerm` come from the index — see search.ts.
- */
-export function scoreTfIdf(
-  doc: Document,
-  queryTerms: string[],
-  totalDocs: number,
-  docsContainingTerm: (term: string) => number
-): number {
-  const bodyTokens = tokenize([doc.title, doc.headings ?? "", doc.content].join(" "));
-  let score = 0;
+// ---- Snippets with highlights -----------------------------------------------
 
-  for (const term of queryTerms) {
-    const termFrequency = bodyTokens.filter((t) => t === term).length;
-    if (termFrequency === 0) continue;
+const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-    const docsWithTerm = docsContainingTerm(term) || 1;
-    const inverseDocFrequency = Math.log(totalDocs / docsWithTerm + 1);
+/** Matches whole words only, so "art" doesn't light up inside "party". */
+function termRegex(terms: string[]): RegExp | null {
+  const alternatives = [...new Set(terms)].filter(Boolean).sort((a, b) => b.length - a.length).map(escapeRegex);
+  if (alternatives.length === 0) return null;
+  return new RegExp(`(?<![\\p{L}\\p{N}])(${alternatives.join("|")})(?![\\p{L}\\p{N}])`, "giu");
+}
 
-    score += termFrequency * inverseDocFrequency;
+// Marker characters are control codes: strip any that appear in the source text.
+const stripMarks = (s: string) => s.replace(/[\u0001\u0002]/g, "");
+
+export function highlight(text: string, terms: string[]): string {
+  const clean = stripMarks(text);
+  const re = termRegex(terms);
+  return re ? clean.replace(re, (m) => `${MARK_OPEN}${m}${MARK_CLOSE}`) : clean;
+}
+
+/** An excerpt around the densest cluster of matches, with the matched words marked. */
+export function buildSnippet(content: string, terms: string[], maxLength = 220): string {
+  const text = stripMarks(content.slice(0, 60_000)).replace(/\s+/g, " ").trim();
+  if (!text) return "";
+
+  const re = termRegex(terms);
+  const matches: number[] = [];
+  if (re) {
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(text)) !== null && matches.length < 500) matches.push(m.index);
   }
 
-  return score;
-}
+  if (matches.length === 0) {
+    return text.length <= maxLength ? text : `${text.slice(0, maxLength).replace(/\s+\S*$/, "")}…`;
+  }
 
-/** Builds a short highlighted-ish snippet around the first query match. */
-export function buildSnippet(doc: Document, queryTerms: string[], maxLength = 160): string {
-  const content = doc.content;
-  const lowerContent = content.toLowerCase();
-
-  let matchIndex = -1;
-  for (const term of queryTerms) {
-    const idx = lowerContent.indexOf(term);
-    if (idx !== -1 && (matchIndex === -1 || idx < matchIndex)) {
-      matchIndex = idx;
+  // Pick the window (starting a little before a match) that contains the most matches.
+  let bestStart = 0;
+  let bestCount = -1;
+  for (const idx of matches) {
+    const start = Math.max(0, idx - 40);
+    const count = matches.filter((p) => p >= start && p < start + maxLength).length;
+    if (count > bestCount) {
+      bestCount = count;
+      bestStart = start;
     }
   }
 
-  if (matchIndex === -1) {
-    return content.slice(0, maxLength).trim() + (content.length > maxLength ? "..." : "");
+  let start = bestStart;
+  let end = Math.min(text.length, start + maxLength);
+  // Don't cut words in half at either edge.
+  if (start > 0) {
+    const nextSpace = text.indexOf(" ", start);
+    if (nextSpace !== -1 && nextSpace < start + 25) start = nextSpace + 1;
+  }
+  if (end < text.length) {
+    const lastSpace = text.lastIndexOf(" ", end);
+    if (lastSpace > start + maxLength / 2) end = lastSpace;
   }
 
-  const start = Math.max(0, matchIndex - 60);
-  const end = Math.min(content.length, start + maxLength);
-  const prefix = start > 0 ? "..." : "";
-  const suffix = end < content.length ? "..." : "";
-
-  return prefix + content.slice(start, end).trim() + suffix;
+  const slice = highlight(text.slice(start, end), terms);
+  return `${start > 0 ? "…" : ""}${slice}${end < text.length ? "…" : ""}`;
 }

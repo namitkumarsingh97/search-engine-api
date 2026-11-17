@@ -56,6 +56,7 @@ This runs the tokenizer/index/ranking pipeline directly against `data/documents.
 | `MAX_PAGES`      | Max pages per crawl run                    | `100`                                   |
 | `MAX_DEPTH`      | Max link-following depth                   | `2`                                     |
 | `CORS_ORIGIN`    | Allowed frontend origin                    | `http://localhost:3000`                 |
+| `JWT_SECRET`     | Secret for signing login tokens (required) | —                                       |
 
 If using MongoDB Atlas: whitelist your IP under **Network Access**, and include a database name in the URI path (e.g. `/mini-search`) or it'll default to `test`.
 

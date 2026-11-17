@@ -38,3 +38,6 @@ Thumbs.db
 # Temporary files
 tmp/
 temp/
+
+# Uploaded user files (Drive)
+storage/
