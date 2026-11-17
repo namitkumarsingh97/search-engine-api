@@ -86,7 +86,16 @@ function init(): Promise<void> {
 
 const app = express();
 
-app.use(cors({ origin: process.env.CORS_ORIGIN ?? "http://localhost:3000" }));
+// CORS_ORIGIN may list several origins, comma separated (the main UI and the accounts app).
+const corsOrigins = (process.env.CORS_ORIGIN ?? "http://localhost:3000")
+  .split(",")
+  .map((o) => o.trim().replace(/\/$/, ""))
+  .filter(Boolean);
+app.use(
+  cors({
+    origin: (origin, callback) => callback(null, !origin || corsOrigins.includes(origin)),
+  }),
+);
 app.disable("x-powered-by");
 app.use((_req, res, next) => {
   // Uploaded content is always served as a download or media, never as a page.
