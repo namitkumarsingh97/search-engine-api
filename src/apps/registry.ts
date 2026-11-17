@@ -102,6 +102,32 @@ const DEFAULT_PRODUCTS = [
     visible: true,
     order: 20,
   },
+  {
+    slug: "namit-singh",
+    name: "Namit Singh",
+    tagline: "Full-stack developer portfolio",
+    description: "Full-Stack Developer & Digital Solutions Architect: React, Next.js, TypeScript and more.",
+    url: "https://namit-singh-portfolio.vercel.app",
+    icon: "globe",
+    tone: "charcoal",
+    keywords: ["namit", "portfolio", "developer", "full-stack", "react", "nextjs"],
+    openInNewTab: false,
+    visible: true,
+    order: 30,
+  },
+  {
+    slug: "kumari-pooja",
+    name: "Kumari Pooja",
+    tagline: "SEO & digital marketing portfolio",
+    description: "Junior SEO & Digital Marketing Executive: on-page, off-page and content systems.",
+    url: "https://pooja-seo-portfolio.vercel.app",
+    icon: "bar-chart",
+    tone: "paper",
+    keywords: ["pooja", "portfolio", "seo", "digital marketing", "content"],
+    openInNewTab: false,
+    visible: true,
+    order: 40,
+  },
 ];
 
 /** Adds the default products once, ever. Deleting one later keeps it deleted. */
