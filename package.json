@@ -7,7 +7,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "search": "tsx src/scripts/search-cli.ts",
-    "seed": "tsx src/scripts/seed.ts"
+    "seed": "tsx src/scripts/seed.ts",
+    "crawl:bulk": "tsx src/scripts/bulk-crawl.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

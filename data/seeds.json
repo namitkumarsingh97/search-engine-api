@@ -1,0 +1,64 @@
+{
+  "_note": "Starting points for `npm run crawl:bulk`. Each seed is crawled together with up to `pages` pages of the same site (Wikipedia: other articles; docs sites: pages under the same path). Add more groups or seeds freely, then run it again: pages already stored are not fetched again.",
+  "groups": [
+    {
+      "name": "Programming & computing",
+      "pages": 8,
+      "wikipedia": ["Python_(programming_language)", "JavaScript", "TypeScript", "Java_(programming_language)", "C%2B%2B", "C_(programming_language)", "Rust_(programming_language)", "Go_(programming_language)", "SQL", "HTML", "CSS", "React_(software)", "Node.js", "Git", "Linux", "Docker_(software)", "Kubernetes", "Machine_learning", "Artificial_intelligence", "Deep_learning", "Data_structure", "Algorithm", "Cloud_computing", "Computer_security", "Blockchain", "Internet", "Operating_system", "Database", "Application_programming_interface", "Web_development", "Software_engineering", "Computer_network", "Big_data", "Data_science"]
+    },
+    {
+      "name": "Documentation sites",
+      "pages": 30,
+      "seeds": [
+        "https://docs.python.org/3/tutorial/index.html",
+        "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide",
+        "https://developer.mozilla.org/en-US/docs/Learn_web_development",
+        "https://react.dev/learn",
+        "https://doc.rust-lang.org/book/",
+        "https://go.dev/doc/",
+        "https://www.postgresql.org/docs/current/tutorial.html",
+        "https://nodejs.org/en/learn"
+      ]
+    },
+    {
+      "name": "Science & nature",
+      "pages": 8,
+      "wikipedia": ["Physics", "Chemistry", "Biology", "Astronomy", "Solar_System", "Black_hole", "Climate_change", "Evolution", "DNA", "Quantum_mechanics", "Theory_of_relativity", "Periodic_table", "Human_body", "Photosynthesis", "Earthquake", "Volcano", "Ocean", "Dinosaur", "Ecosystem", "Genetics", "Electricity", "Energy", "Atom", "Gravity", "Weather", "Space_exploration", "NASA", "Indian_Space_Research_Organisation", "Mars", "Moon"]
+    },
+    {
+      "name": "Mathematics",
+      "pages": 6,
+      "wikipedia": ["Mathematics", "Calculus", "Algebra", "Statistics", "Probability_theory", "Geometry", "Number_theory", "Linear_algebra", "Trigonometry", "Prime_number"]
+    },
+    {
+      "name": "History & geography",
+      "pages": 8,
+      "wikipedia": ["World_War_I", "World_War_II", "Ancient_Egypt", "Roman_Empire", "Industrial_Revolution", "Cold_War", "Renaissance", "Mughal_Empire", "Indian_independence_movement", "History_of_India", "India", "United_States", "China", "Europe", "Africa", "Asia", "Himalayas", "Amazon_rainforest", "Sahara", "Ancient_Greece", "French_Revolution", "Maurya_Empire", "Great_Wall_of_China", "List_of_countries_by_population"]
+    },
+    {
+      "name": "Health & wellbeing",
+      "pages": 6,
+      "wikipedia": ["Nutrition", "Diabetes", "Cancer", "Vaccine", "Yoga", "Mental_health", "Physical_exercise", "COVID-19_pandemic", "Sleep", "Vitamin", "Ayurveda", "First_aid"]
+    },
+    {
+      "name": "Business, money & economy",
+      "pages": 6,
+      "wikipedia": ["Economics", "Inflation", "Stock_market", "Cryptocurrency", "Startup_company", "Marketing", "Entrepreneurship", "Supply_chain_management", "Banking", "Taxation", "Gross_domestic_product", "E-commerce"]
+    },
+    {
+      "name": "Sports, arts & culture",
+      "pages": 6,
+      "wikipedia": ["Cricket", "Association_football", "Olympic_Games", "Chess", "Music", "Film", "Bollywood", "Literature", "Painting", "Photography", "Cooking", "Indian_cuisine", "Tea", "Coffee", "Dance", "Architecture", "Video_game", "Tennis", "Basketball", "Formula_One"]
+    },
+    {
+      "name": "Technology & everyday life",
+      "pages": 6,
+      "wikipedia": ["Smartphone", "Electric_vehicle", "Renewable_energy", "Solar_power", "Internet_of_things", "Robotics", "Semiconductor", "Wi-Fi", "5G", "Social_media", "Search_engine", "Web_browser", "Email", "Camera", "Television", "Aviation", "Railway", "Agriculture", "Water_supply", "Sustainability"]
+    },
+    {
+      "name": "Society & ideas",
+      "pages": 6,
+      "wikipedia": ["Philosophy", "Psychology", "Education", "Language", "English_language", "Hindi", "Law", "Democracy", "United_Nations", "Human_rights", "Religion", "Sociology", "Ethics", "Journalism", "Library", "Time_management"]
+    }
+  ]
+}

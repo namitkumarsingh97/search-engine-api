@@ -36,6 +36,14 @@ npm run dev    # starts the API with hot reload
 
 The API listens on `http://localhost:4000` by default. Check `http://localhost:4000/api/health` to confirm it's up.
 
+### Bulk crawl (a much bigger index)
+
+```bash
+npm run crawl:bulk -- --max=1500   # --group=science, --dry to preview
+```
+
+Crawls the topics listed in `data/seeds.json` (Wikipedia, docs sites...). Polite, resumable, safe to re-run. Restart the API afterwards so it loads the new pages.
+
 ### Search without MongoDB
 
 You don't need MongoDB running to try the core search logic:
