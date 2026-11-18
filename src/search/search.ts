@@ -14,6 +14,23 @@ export interface SearchOptions {
   pageSize?: number;
   /** "relevance" (default) or "date" (newest first; undated documents last). */
   sort?: "relevance" | "date";
+  /** The visitor confirmed they are 18+: show mature results. Off by default (SafeSearch). */
+  showMature?: boolean;
+}
+
+/**
+ * Words that mean the visitor is after explicit material. Nexa doesn't index it; the point is the age
+ * signal: without a confirmation the search is not run at all and the UI asks for the confirmation.
+ */
+const EXPLICIT_TERMS = new Set([
+  "porn", "porno", "pornography", "pornhub", "xvideos", "xnxx", "xhamster", "xxx", "nsfw", "nude", "nudes", "naked",
+  "hentai", "erotic", "erotica", "onlyfans", "milf", "fetish", "camgirl", "camgirls", "escort", "escorts", "stripper",
+  "blowjob", "orgasm", "bdsm", "hardcore", "sexcam", "sexting",
+]);
+
+/** True when the query itself asks for adult material. */
+export function isAdultQuery(terms: string[]): boolean {
+  return terms.some((t) => EXPLICIT_TERMS.has(t));
 }
 
 /** Public docs (no owner) are visible to everyone; private docs only to their owner. */
@@ -65,9 +82,17 @@ export function runSearch(index: SearchIndex, rawQuery: string, options: SearchO
     results: [],
     facets: emptyFacets(),
     suggestion,
+    safeSearch: !options.showMature,
+    matureHidden: 0,
+    ageCheck: false,
   });
 
   if (parsed.terms.length === 0 && !filterOnly) return empty();
+
+  // Explicit searches need the age confirmation first: nothing is searched until the visitor gives it.
+  const adultTerms = [...parsed.terms, ...parsed.phrases.flat()];
+  if (isAdultQuery(adultTerms) && !options.showMature) return { ...empty(), ageCheck: true };
+  let matureHidden = 0;
 
   // Which terms to score by, and how much each counts for (1 = exact, lower = typo match).
   const weights = new Map<string, number>();
@@ -111,6 +136,10 @@ export function runSearch(index: SearchIndex, rawQuery: string, options: SearchO
     const type = doc.type ?? "web";
 
     if (!isVisible(doc, options.viewerId)) continue;
+    if (doc.mature && !options.showMature) {
+      matureHidden++;
+      continue;
+    }
     if (parsed.excluded.some((t) => entry.tf.has(t))) continue;
     if (parsed.site) {
       const host = type === "web" ? (doc.domain ?? hostOf(doc.url)).replace(/^www\./, "") : "";
@@ -176,6 +205,9 @@ export function runSearch(index: SearchIndex, rawQuery: string, options: SearchO
     results,
     facets,
     suggestion,
+    safeSearch: !options.showMature,
+    matureHidden,
+    ageCheck: matureHidden > 0 || isAdultQuery(adultTerms),
   };
 }
 

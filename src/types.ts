@@ -16,6 +16,8 @@ export interface Document {
   crawledAt?: string;
   /** When the content is "from": sent time, upload time, event start. Drives recency ranking and date sort. */
   date?: string;
+  /** Adults-only subject matter (sex education, alcohol, gambling...). Hidden unless the viewer confirmed they are 18+. */
+  mature?: boolean;
 }
 
 /** Marks around matched words in `snippet` / `titleMarked`. The UI turns them into <mark>. */
@@ -48,6 +50,12 @@ export interface SearchResponse {
   facets: SearchFacets;
   /** "Did you mean" query when a word looked misspelled. */
   suggestion?: string;
+  /** True while mature results are being hidden (the default). */
+  safeSearch: boolean;
+  /** How many mature results were hidden for this query. */
+  matureHidden: number;
+  /** The search touches adult topics: the UI should ask the visitor to confirm they are 18+. */
+  ageCheck: boolean;
 }
 
 export type InvertedIndex = Map<string, Set<string>>;

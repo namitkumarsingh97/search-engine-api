@@ -34,6 +34,8 @@ const DEFAULT_HOST_DELAY_MS = 1000;
 interface Group {
   name: string;
   pages: number;
+  /** Pages of this group are adults-only subject matter: stored with mature = true. */
+  mature?: boolean;
   wikipedia?: string[];
   seeds?: string[];
 }
@@ -101,7 +103,7 @@ let newPages = 0;
 let failed = 0;
 let skipped = 0;
 
-async function crawlSeed(seedUrl: string, limit: number, label: string): Promise<void> {
+async function crawlSeed(seedUrl: string, limit: number, label: string, mature: boolean): Promise<void> {
   const seed = new URL(seedUrl);
   const prefix = prefixOf(seed);
   const queue: string[] = [normalizeUrl(seedUrl)];
@@ -139,6 +141,7 @@ async function crawlSeed(seedUrl: string, limit: number, label: string): Promise
           links: parsed.links.slice(0, 150),
           domain: seed.hostname,
           crawledAt: new Date(),
+          mature,
         },
         { upsert: true },
       );
@@ -168,10 +171,10 @@ async function main() {
   const file = path.join(__dirname, "..", "..", "data", "seeds.json");
   const groups: Group[] = (JSON.parse(fs.readFileSync(file, "utf-8")).groups ?? []).filter((g: Group) => g.name.toLowerCase().includes(GROUP_FILTER));
 
-  const jobs: { url: string; limit: number; label: string }[] = [];
+  const jobs: { url: string; limit: number; label: string; mature: boolean }[] = [];
   for (const g of groups) {
-    for (const title of g.wikipedia ?? []) jobs.push({ url: `https://en.wikipedia.org/wiki/${title}`, limit: g.pages, label: `${g.name} / ${title}` });
-    for (const url of g.seeds ?? []) jobs.push({ url, limit: g.pages, label: `${g.name} / ${url}` });
+    for (const title of g.wikipedia ?? []) jobs.push({ url: `https://en.wikipedia.org/wiki/${title}`, limit: g.pages, label: `${g.name} / ${title}`, mature: g.mature === true });
+    for (const url of g.seeds ?? []) jobs.push({ url, limit: g.pages, label: `${g.name} / ${url}`, mature: g.mature === true });
   }
   console.log(`[bulk] ${jobs.length} seeds in ${groups.length} groups, up to ${MAX_NEW} new pages${DRY ? " (dry run)" : ""}`);
   if (DRY) {
@@ -188,7 +191,7 @@ async function main() {
     while (cursor < jobs.length && newPages < MAX_NEW) {
       const job = jobs[cursor++];
       try {
-        await crawlSeed(job.url, job.limit, job.label);
+        await crawlSeed(job.url, job.limit, job.label, job.mature);
       } catch (err) {
         console.error(`[bulk] ${job.label} failed:`, err instanceof Error ? err.message : err);
       }

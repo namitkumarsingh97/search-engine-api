@@ -50,6 +50,7 @@ async function loadIndexFromDatabase(): Promise<void> {
       content: page.content,
       headings: page.headings,
       domain: page.domain,
+      mature: page.mature === true,
     })),
   );
 

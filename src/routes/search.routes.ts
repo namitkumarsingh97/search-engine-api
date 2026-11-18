@@ -103,6 +103,8 @@ searchRouter.get(
       page,
       pageSize,
       sort,
+      // Self-declared by the visitor ("I am 18 or older"): the UI sends mature=1 only after they confirmed.
+      showMature: req.query.mature === "1",
     });
 
     // The signed-in person's own mail. On the Mail tab it IS the result list; elsewhere only the
