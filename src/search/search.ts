@@ -92,7 +92,8 @@ export function runSearch(index: SearchIndex, rawQuery: string, options: SearchO
   // Explicit searches need the age confirmation first: nothing is searched until the visitor gives it.
   const adultTerms = [...parsed.terms, ...parsed.phrases.flat()];
   if (isAdultQuery(adultTerms) && !options.showMature) return { ...empty(), ageCheck: true };
-  let matureHidden = 0;
+  const hiddenScores: number[] = [];
+  let topScore = 0;
 
   // Which terms to score by, and how much each counts for (1 = exact, lower = typo match).
   const weights = new Map<string, number>();
@@ -136,10 +137,6 @@ export function runSearch(index: SearchIndex, rawQuery: string, options: SearchO
     const type = doc.type ?? "web";
 
     if (!isVisible(doc, options.viewerId)) continue;
-    if (doc.mature && !options.showMature) {
-      matureHidden++;
-      continue;
-    }
     if (parsed.excluded.some((t) => entry.tf.has(t))) continue;
     if (parsed.site) {
       const host = type === "web" ? (doc.domain ?? hostOf(doc.url)).replace(/^www\./, "") : "";
@@ -174,11 +171,22 @@ export function runSearch(index: SearchIndex, rawQuery: string, options: SearchO
     // Your own stuff shouldn't be drowned out by the whole web.
     if (doc.ownerId && doc.ownerId === options.viewerId) score *= 1.15;
 
+    // SafeSearch: mature pages are held back (their scores decide later whether the visitor is told).
+    if (doc.mature && !options.showMature) {
+      hiddenScores.push(score);
+      topScore = Math.max(topScore, score);
+      continue;
+    }
+    topScore = Math.max(topScore, score);
+
     facets[type]++;
     facets.all++;
     if (typeFilter && type !== typeFilter) continue;
     scored.push({ doc, score, dateMs: doc.date ? Date.parse(doc.date) || 0 : 0 });
   }
+
+  // Only mention hidden pages that are really relevant (a stray match inside a long page isn't worth an age notice).
+  const matureHidden = hiddenScores.filter((sc) => sc >= topScore * 0.5).length;
 
   if (options.sort === "date") scored.sort((a, b) => b.dateMs - a.dateMs || b.score - a.score);
   else scored.sort((a, b) => b.score - a.score || b.dateMs - a.dateMs);
